@@ -101,7 +101,7 @@ namespace Tactical.Actor.Editor {
 		private static GameObject Create (string fullPath) {
 			var instance = new GameObject ("temp");
 			instance.AddComponent<Job>();
-			GameObject prefab = PrefabUtility.CreatePrefab( fullPath, instance );
+			GameObject prefab = PrefabUtility.SaveAsPrefabAsset(instance, fullPath);
 			GameObject.DestroyImmediate(instance);
 			return prefab;
 		}

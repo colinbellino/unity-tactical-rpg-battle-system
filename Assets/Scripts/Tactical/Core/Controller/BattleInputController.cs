@@ -1,8 +1,5 @@
 using UnityEngine;
-using UnityEngine.InputNew;
-using UnityEngine.Assertions;
 using System;
-using System.Collections.Generic;
 using Tactical.Grid.Model;
 using Tactical.Core.Enums;
 using Tactical.Core.EventArgs;
@@ -13,34 +10,18 @@ namespace Tactical.Core.Controller {
 
 		public static event EventHandler<InfoEventArgs<Point>> MoveEvent;
 		public static event EventHandler<InfoEventArgs<BattleInputs>> ActionEvent;
-		public PlayerInput playerInput;
+		public GameControls controls;
 
-		private ExplorationControls explorationControls;
-		private BattleControls battleControls;
 		private Repeater horizontal;
 		private Repeater vertical;
-		private Dictionary<BattleInputs, ButtonInputControl> actionButtons = new Dictionary<BattleInputs, ButtonInputControl> ();
 
 		private void Start () {
-			explorationControls = playerInput.GetActions<ExplorationControls>();
-			battleControls = playerInput.GetActions<BattleControls>();
+			controls = new GameControls();
+			controls.Battle.Enable();
 
 			// Create the repeaters for the axis.
-			horizontal = new Repeater(battleControls.moveX);
-			vertical = new Repeater(battleControls.moveY);
-
-			// Create the action buttons.
-			actionButtons.Add(BattleInputs.Confirm, battleControls.confirm);
-			actionButtons.Add(BattleInputs.Cancel, battleControls.cancel);
-			actionButtons.Add(BattleInputs.RotateCameraLeft, explorationControls.rotateCameraLeft);
-			actionButtons.Add(BattleInputs.RotateCameraRight, explorationControls.rotateCameraRight);
-
-			Assert.IsNotNull(explorationControls, "explorationControls required");
-			Assert.IsNotNull(battleControls, "battleControls required");
-		}
-
-		private void OnValidate () {
-			Assert.IsNotNull(playerInput, "playerInput required");
+			horizontal = new Repeater();
+			vertical = new Repeater();
 		}
 
 		private void Update () {
@@ -49,24 +30,30 @@ namespace Tactical.Core.Controller {
 		}
 
 		private void HandleMove () {
-			int x = horizontal.Update();
-			int y = vertical.Update();
+			var move = controls.Battle.Move.ReadValue<Vector2>();
+			int x = horizontal.Update(move.x);
+			int y = vertical.Update(move.y);
 
 			// Handle movement inputs.
 			if (x != 0 || y != 0) {
-				if (MoveEvent != null) {
-					MoveEvent(this, new InfoEventArgs<Point>(new Point(x, y)));
-				}
-			}
+				MoveEvent?.Invoke(this, new InfoEventArgs<Point>(new Point(x, y)));
+	  	}
 		}
 
 		private void HandleAction () {
 			// Handle action inputs.
-			foreach (var item in actionButtons) {
-				if (item.Value.wasJustPressed) {
-					if (ActionEvent != null) {
-						ActionEvent(this, new InfoEventArgs<BattleInputs>(item.Key));
-					}
+			if (controls.Battle.Confirm.WasReleasedThisFrame()) {
+				ActionEvent?.Invoke(this, new InfoEventArgs<BattleInputs>(BattleInputs.Confirm));
+			}
+			if (controls.Battle.Cancel.WasReleasedThisFrame()) {
+				ActionEvent?.Invoke(this, new InfoEventArgs<BattleInputs>(BattleInputs.Cancel));
+			}
+			if (controls.Battle.RotateCamera.WasPerformedThisFrame()) {
+				var value = controls.Battle.RotateCamera.ReadValue<float>();
+				if (value < 0) {
+					ActionEvent?.Invoke(this, new InfoEventArgs<BattleInputs>(BattleInputs.RotateCameraLeft));
+				} else {
+					ActionEvent?.Invoke(this, new InfoEventArgs<BattleInputs>(BattleInputs.RotateCameraRight));
 				}
 			}
 		}
@@ -79,15 +66,10 @@ namespace Tactical.Core.Controller {
 		private const float rate = 0.15f;
 		private float next;
 		private bool hold;
-		private readonly AxisInputControl axis;
 
-		public Repeater (AxisInputControl axis) {
-			this.axis = axis;
-		}
-
-		public int Update () {
+		public int Update (float rawValue) {
 			int retValue = 0;
-			int value = Mathf.RoundToInt(axis.rawValue);
+			int value = Mathf.RoundToInt(rawValue);
 
 			if (value != 0) {
 				if (Time.time > next) {

@@ -59,7 +59,7 @@ namespace Tactical.Core.Editor {
 
 		private static GameObject Create (string fullPath) {
 			GameObject instance = new GameObject ("temp");
-			GameObject prefab = PrefabUtility.CreatePrefab( fullPath, instance );
+			GameObject prefab = PrefabUtility.SaveAsPrefabAsset(instance, fullPath);
 			GameObject.DestroyImmediate(instance);
 			return prefab;
 		}

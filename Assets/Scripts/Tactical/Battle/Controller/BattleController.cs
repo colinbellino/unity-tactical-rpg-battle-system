@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.InputNew;
 using System.Collections;
 using System.Collections.Generic;
 using Tactical.Core.StateMachine;
