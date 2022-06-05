@@ -23,7 +23,7 @@ namespace Tactical.Actor.Component {
 
 		protected virtual void Awake () {
 			unit = GetComponent<Unit>();
-			jumper = transform.FindChild("Jumper");
+			jumper = transform.Find("Jumper");
 
 			Assert.IsNotNull(jumper);
 		}
