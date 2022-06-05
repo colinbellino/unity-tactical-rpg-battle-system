@@ -4,7 +4,8 @@ This project is a really barebone tactical RPG i built to learn how to use Unity
 
 Special thanks to [Jon](http://theliquidfire.com/about/) for his super useful series of unity tutorial (http://theliquidfire.com/2015/05/04/tactics-rpg-series-intro/)
 
-![screenshot1](https://user-images.githubusercontent.com/622180/128101975-99b269df-35e1-42cb-95e5-80976f6487e5.png)
+![screenshot1](Media/screenshot1-05-06-2022.png)
+![screenshot2](Media/screenshot2-05-06-2022.png)
 
 ## How to use
 
