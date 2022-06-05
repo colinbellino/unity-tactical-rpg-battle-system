@@ -28,3 +28,7 @@ debug.txt
 
 # Generated resources
 Assets/Resources/Jobs/*
+
+# VSCode stuff
+/.history/
+/.vscode/
